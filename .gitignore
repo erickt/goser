@@ -9,6 +9,7 @@ cpu.prof
 cpu.svg
 src/capnp/country.capnp.go
 src/capnp/log.capnp.go
+src/ffjson/log_ffjson.go
 src/gogopb/log.pb.go
 src/gogopb_both/log.pb.go
 src/gogopb_nullable/log.pb.go

@@ -9,6 +9,7 @@ import (
 	"gogopb_both"
 	"pb"
 	"testing"
+	"ffjson"
 )
 
 func BenchmarkPopulatePb(b *testing.B) {
@@ -34,6 +35,14 @@ func BenchmarkPopulateCapnp(b *testing.B) {
 		segment := capn.NewBuffer(buf[:0])
 		record := capnp.NewRootLog(segment)
 		newCapnpLog(&record)
+	}
+}
+
+func BenchmarkPopulateFFJSON(b *testing.B) {
+	var record ffjson.Log
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ffjson.NewLog(&record)
 	}
 }
 
@@ -122,6 +131,28 @@ func BenchmarkMarshalCapnp(b *testing.B) {
 		_, err := segment.WriteTo(&buf)
 		if err != nil {
 			b.Fatalf("WriteTo: %v", err)
+		}
+	}
+}
+
+func BenchmarkMarshalFFJSON(b *testing.B) {
+	var record ffjson.Log
+	ffjson.NewLog(&record)
+
+	buf, err := record.MarshalJSON()
+	if err != nil {
+		b.Fatalf("Marshal: %v", err)
+	}
+	b.SetBytes(int64(len(buf)))
+
+	buffer := bytes.NewBuffer(make([]byte, 1<<20))
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		buffer.Reset()
+		err := record.MarshalJSONBuf(buffer)
+		if err != nil {
+			b.Fatalf("Marshal: %v", err)
 		}
 	}
 }

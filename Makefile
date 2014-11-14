@@ -5,7 +5,11 @@ export GOMAXPROCS := 1
 GOCMD := go
 
 .PHONY: all
-all: get capnproto proto capn
+all: get capnproto proto capn ffjson
+	go test -c goser
+	./goser.test
+	./goser.test -test.benchtime=10s -test.cpuprofile=cpu.prof -test.run=XXX -test.bench=. -test.benchmem
+	go tool pprof --svg goser.test cpu.prof > cpu.svg
 
 .PHONY: proto
 proto:
@@ -27,10 +31,6 @@ capn:
 	go version
 	go install -v github.com/glycerine/go-capnproto/capnpc-go
 	capnp compile --verbose -ogo $(PWD)/src/capnp/log.capnp $(PWD)/src/capnp/country.capnp
-	go test -c goser
-	./goser.test
-	./goser.test -test.benchtime=10s -test.cpuprofile=cpu.prof -test.run=XXX -test.bench=. -test.benchmem
-	go tool pprof --svg goser.test cpu.prof > cpu.svg
 
 .PHONY: get
 get:
@@ -40,6 +40,7 @@ get:
 	GOPATH=$(PWD)/gopath go get -u -d github.com/glycerine/go-capnproto
 	GOPATH=$(PWD)/gopath go get -u -d github.com/kaos/capnp_test || true
 	GOPATH=$(PWD)/gopath go get code.google.com/p/go.tools/cmd/benchcmp
+	GOPATH=$(PWD)/gopath go get -u -d github.com/pquerna/ffjson
 
 .PHONY: capnproto
 capnproto:
@@ -50,6 +51,11 @@ capnproto:
 	./configure --prefix=$(PWD) && \
 	make -j4 && \
 	make install	
+
+.PHONY: ffjson
+ffjson:
+	go install -v github.com/pquerna/ffjson
+	cd src && ffjson ffjson/log.go
 
 .PHONY: gofmt
 gofmt:
