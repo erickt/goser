@@ -5,3 +5,5 @@ pkg/
 capnproto/
 gopath/
 *.test
+cpu.prof
+cpu.svg
